@@ -24,7 +24,7 @@ import evernote.edam.error.ttypes as Errors
 # purpose of exploring the API, you can get a developer token that allows
 # you to access your own Evernote account. To get a developer token, visit 
 # https://sandbox.evernote.com/api/DeveloperToken.action
-authToken = "your developer token"
+authToken = file("evernote.token").read()
 
 if authToken == "your developer token":
     print "Please fill in your developer token"
@@ -35,7 +35,7 @@ if authToken == "your developer token":
 # service, change "sandbox.evernote.com" to "www.evernote.com" and replace your
 # developer token above with a token from 
 # https://www.evernote.com/api/DeveloperToken.action
-evernoteHost = "sandbox.evernote.com"
+evernoteHost = "www.evernote.com"
 userStoreUri = "https://" + evernoteHost + "/edam/user"
 
 userStoreHttpClient = THttpClient.THttpClient(userStoreUri)
@@ -66,53 +66,53 @@ print "Found ", len(notebooks), " notebooks:"
 for notebook in notebooks:
     print "  * ", notebook.name
 
-print
-print "Creating a new note in the default notebook"
-print
+# print
+# print "Creating a new note in the default notebook"
+# print
 
-# To create a new note, simply create a new Note object and fill in 
-# attributes such as the note's title.
-note = Types.Note()
-note.title = "Test note from EDAMTest.py"
+# # To create a new note, simply create a new Note object and fill in 
+# # attributes such as the note's title.
+# note = Types.Note()
+# note.title = "Test note from EDAMTest.py"
 
-# To include an attachment such as an image in a note, first create a Resource
-# for the attachment. At a minimum, the Resource contains the binary attachment 
-# data, an MD5 hash of the binary data, and the attachment MIME type. It can also 
-# include attributes such as filename and location.
-image = open('enlogo.png', 'rb').read()
-md5 = hashlib.md5()
-md5.update(image)
-hash = md5.digest()
+# # To include an attachment such as an image in a note, first create a Resource
+# # for the attachment. At a minimum, the Resource contains the binary attachment 
+# # data, an MD5 hash of the binary data, and the attachment MIME type. It can also 
+# # include attributes such as filename and location.
+# image = open('enlogo.png', 'rb').read()
+# md5 = hashlib.md5()
+# md5.update(image)
+# hash = md5.digest()
 
-data = Types.Data()
-data.size = len(image)
-data.bodyHash = hash
-data.body = image
+# data = Types.Data()
+# data.size = len(image)
+# data.bodyHash = hash
+# data.body = image
 
-resource = Types.Resource()
-resource.mime = 'image/png'
-resource.data = data
+# resource = Types.Resource()
+# resource.mime = 'image/png'
+# resource.data = data
 
-# Now, add the new Resource to the note's list of resources
-note.resources = [ resource ]
+# # Now, add the new Resource to the note's list of resources
+# note.resources = [ resource ]
 
-# To display the Resource as part of the note's content, include an <en-media>
-# tag in the note's ENML content. The en-media tag identifies the corresponding
-# Resource using the MD5 hash.
-hashHex = binascii.hexlify(hash)
+# # To display the Resource as part of the note's content, include an <en-media>
+# # tag in the note's ENML content. The en-media tag identifies the corresponding
+# # Resource using the MD5 hash.
+# hashHex = binascii.hexlify(hash)
 
-# The content of an Evernote note is represented using Evernote Markup Language
-# (ENML). The full ENML specification can be found in the Evernote API Overview
-# at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-note.content = '<?xml version="1.0" encoding="UTF-8"?>'
-note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
-note.content += '<en-note>Here is the Evernote logo:<br/>'
-note.content += '<en-media type="image/png" hash="' + hashHex + '"/>'
-note.content += '</en-note>'
+# # The content of an Evernote note is represented using Evernote Markup Language
+# # (ENML). The full ENML specification can be found in the Evernote API Overview
+# # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
+# note.content = '<?xml version="1.0" encoding="UTF-8"?>'
+# note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+# note.content += '<en-note>Here is the Evernote logo:<br/>'
+# note.content += '<en-media type="image/png" hash="' + hashHex + '"/>'
+# note.content += '</en-note>'
 
-# Finally, send the new note to Evernote using the createNote method
-# The new Note object that is returned will contain server-generated
-# attributes such as the new note's unique GUID.
-createdNote = noteStore.createNote(authToken, note)
+# # Finally, send the new note to Evernote using the createNote method
+# # The new Note object that is returned will contain server-generated
+# # attributes such as the new note's unique GUID.
+# createdNote = noteStore.createNote(authToken, note)
 
-print "Successfully created a new note with GUID: ", createdNote.guid
+# print "Successfully created a new note with GUID: ", createdNote.guid

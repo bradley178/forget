@@ -1,9 +1,9 @@
-from mock import Mock, patch, call
-from forget import todo 
-import time
-import uuid
 from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Tag
+from forget import todo 
+from mock import Mock, patch, call
+import time
+import uuid
 
 class TestTODOList(object):
 	def setup_method(self, method):		

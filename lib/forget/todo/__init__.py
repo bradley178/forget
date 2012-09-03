@@ -1,6 +1,6 @@
-import evernote.edam.notestore.ttypes as NoteStoreTypes
-from evernote.edam.type.ttypes import Note
 from datetime import datetime, timedelta
+from evernote.edam.type.ttypes import Note
+import evernote.edam.notestore.ttypes as NoteStoreTypes
 
 class List(object):
 	def __init__(self, client, authtoken):		

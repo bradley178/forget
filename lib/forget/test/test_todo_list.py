@@ -1,6 +1,7 @@
 from mock import Mock, patch, call
 from forget import todo 
 import time
+import uuid
 from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Tag
 
@@ -14,12 +15,15 @@ class TestTODOList(object):
 		self.mock_authtoken = Mock()
 
 		self.notefilter_patcher = patch("forget.todo.NoteStoreTypes.NoteFilter")
+		self.note_patcher = patch("forget.todo.Note")
 
 		self.mock_notefilter = self.notefilter_patcher.start()
+		self.mock_note = self.note_patcher.start()
 
 
 	def teardown_method(self, method):
 		self.notefilter_patcher.stop()
+		self.note_patcher.stop()
 
 	def _patch_decode_tag_guid(self):
 		tags = {'1dayguid': '1-day-todo', 
@@ -47,6 +51,11 @@ class TestTODOList(object):
 
 		assert list.notes == self.mock_notestore_client.findNotes.return_value.notes
 
+	def test_constructor_saves_notebook_guid(self):
+		self.mock_notestore_client.findNotes.return_value = Mock(notes = self._build_notes_list(1), totalNotes = 10)
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		assert list.notebook_guid == self.mock_notestore_client.findNotes.return_value.notes[0].notebookGuid
 
 	def test_constructor_multiple_batches(self):
 		note_batches = [Mock(notes = self._build_notes_list(50), totalNotes = 60), 
@@ -71,7 +80,7 @@ class TestTODOList(object):
 		
 		self.mock_notestore_client.getTag.assert_called_once_with(self.mock_authtoken, '1dayguid')
 
-	def test_decode_tag_guid_3_day(self):
+	def test_decode_tag_guid_1_week(self):
 		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
 		self.mock_notestore_client.getTag.return_value = Tag(name="3-day-todo")
 		
@@ -144,6 +153,115 @@ class TestTODOList(object):
 		self._patch_decode_tag_guid()
 		list.notes = notes
 		assert list.tasks_by_expiration() == notes
+
+	def test_delete_expired(self):
+		notes = [Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "qwerty")]
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		self._patch_decode_tag_guid()
+		list.notes = notes
+		list.delete_expired()
+
+		self.mock_notestore_client.deleteNote.assert_called_with(self.mock_authtoken, "qwerty")
+		assert list.notes == []
+
+	def test_delete_2_expired(self):
+		notes = [Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "qwerty"),
+				 Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "asdfg")]
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		self._patch_decode_tag_guid()
+		list.notes = notes
+		list.delete_expired()
+
+		assert self.mock_notestore_client.deleteNote.call_args_list ==\
+			[call(self.mock_authtoken, "qwerty"), call(self.mock_authtoken, "asdfg")]
+		assert list.notes == []
+
+	def test_delete_2_expired(self):
+		notes = [Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "qwerty"),
+				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "asdfg")]
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		self._patch_decode_tag_guid()
+		list.notes = notes
+		list.delete_expired()
+
+		self.mock_notestore_client.deleteNote.assert_called_once_with(self.mock_authtoken, "qwerty")
+		assert len(list.notes) == 1
+		assert list.notes[0].guid == "asdfg"
+
+	def test_delete_no_expired(self):
+		notes = [Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "qwerty"),
+				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "bhyggv"),
+				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "hvgvjv"),
+				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "hhycjbk")]
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		self._patch_decode_tag_guid()
+		list.notes = notes
+		list.delete_expired()
+		
+		assert len(list.notes) == 4
+		assert self.mock_notestore_client.deleteNote.call_args_list == []
+
+	def test_delete_expired_returns_deleted_count(self):
+		notes = [Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "qwerty"),
+				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "asdfg")]
+
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		self._patch_decode_tag_guid()
+		list.notes = notes
+		assert list.delete_expired() == 1
+
+	def test_add_task_1_day(self):
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		list.notebook_guid = uuid.uuid4()
+		list.add_1_day_task("task description")
+
+		self.mock_note.assert_called_with(title="task description", 
+										  tagNames=["1-day-todo"], 
+										  notebookGuid=list.notebook_guid)
+		self.mock_notestore_client.createNote.assert_called_with(self.mock_authtoken, self.mock_note.return_value)
+		assert list.notes == [self.mock_notestore_client.createNote.return_value]
+
+		
+	def test_add_task_3_day(self):
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		list.notebook_guid = uuid.uuid4()
+		list.add_3_day_task("task description")
+
+		self.mock_note.assert_called_with(title="task description", 
+										  tagNames=["3-day-todo"], 
+										  notebookGuid=list.notebook_guid)
+		self.mock_notestore_client.createNote.assert_called_with(self.mock_authtoken, self.mock_note.return_value)
+		assert list.notes == [self.mock_notestore_client.createNote.return_value]
+
+	def test_add_task_1_week(self):
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		list.notebook_guid = uuid.uuid4()
+		list.add_1_week_task("task description")
+
+		self.mock_note.assert_called_with(title="task description", 
+										  tagNames=["1-week-todo"], 
+										  notebookGuid=list.notebook_guid)
+		self.mock_notestore_client.createNote.assert_called_with(self.mock_authtoken, self.mock_note.return_value)
+		assert list.notes == [self.mock_notestore_client.createNote.return_value]
+
+	def test_add_task_1_month(self):
+		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
+		list.notebook_guid = uuid.uuid4()
+		list.add_1_month_task("task description")
+
+		self.mock_note.assert_called_with(title="task description", 
+										  tagNames=["1-month-todo"], 
+										  notebookGuid=list.notebook_guid)
+		self.mock_notestore_client.createNote.assert_called_with(self.mock_authtoken, self.mock_note.return_value)
+		assert list.notes == [self.mock_notestore_client.createNote.return_value]
+
+		
+
+
 
 
 

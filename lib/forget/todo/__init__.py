@@ -1,4 +1,5 @@
 import evernote.edam.notestore.ttypes as NoteStoreTypes
+from evernote.edam.type.ttypes import Note
 from datetime import datetime, timedelta
 
 class List(object):
@@ -11,6 +12,7 @@ class List(object):
 	
 		self.notes = []
 		self.tag_cache = {}
+		self.notebook_guid = None
 
 		offset = 0
 		while True:
@@ -18,6 +20,9 @@ class List(object):
 				
 			self.notes += noteList.notes
 			offset += len(noteList.notes)
+
+			if len(self.notes) > 0:
+				self.notebook_guid = self.notes[0].notebookGuid
 
 			if (offset >= noteList.totalNotes):
 				break
@@ -38,8 +43,42 @@ class List(object):
 				return self.tag_cache[guid]
 
 	def task_expiration_date(self, note):
-		return datetime.utcfromtimestamp(note.created / 1000) + self._decode_tag_guid(note.tagGuids)
+		return datetime.fromtimestamp(note.created / 1000) + self._decode_tag_guid(note.tagGuids)
 
 	def tasks_by_expiration(self):		
 		return sorted(self.notes, cmp=lambda x, y: cmp(self.task_expiration_date(x), self.task_expiration_date(y)))
+
+	def delete_expired(self):
+		deleted_count = 0
+		for note in self.notes:
+			if self.task_expiration_date(note) <= datetime.now():
+				self.client.deleteNote(self.authtoken, note.guid)
+				self.notes.remove(note)
+				deleted_count += 1
 		
+		return deleted_count
+
+	def add_1_day_task(self, description):
+		self.notes.append(self.client.createNote(self.authtoken, 
+												 Note(title=description, 
+												 	  tagNames=["1-day-todo"], 
+												 	  notebookGuid=self.notebook_guid)))
+
+	def add_3_day_task(self, description):
+		self.notes.append(self.client.createNote(self.authtoken, 
+												 Note(title=description, 
+												 	  tagNames=["3-day-todo"], 
+												 	  notebookGuid=self.notebook_guid)))
+
+	def add_1_week_task(self, description):
+		self.notes.append(self.client.createNote(self.authtoken, 
+												 Note(title=description, 
+												 	  tagNames=["1-week-todo"], 
+												 	  notebookGuid=self.notebook_guid)))
+
+	def add_1_month_task(self, description):
+		self.notes.append(self.client.createNote(self.authtoken, 
+												 Note(title=description, 
+												 	  tagNames=["1-month-todo"], 
+												 	  notebookGuid=self.notebook_guid)))
+

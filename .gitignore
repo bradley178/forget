@@ -1,2 +1,5 @@
 *.pyc
 evernote.token
+build
+forget.egg-info
+dist

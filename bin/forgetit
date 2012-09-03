@@ -8,10 +8,10 @@ from forget import todo
 from optparse import OptionParser
 
 arg_parser = OptionParser()
-arg_parser.add_option('-d', '--day')
-arg_parser.add_option('-3', '--three-day')
-arg_parser.add_option('-w', '--week')
-arg_parser.add_option('-m', '--month')
+arg_parser.add_option('-d', '--day', action="store_true")
+arg_parser.add_option('-3', '--three-day', action="store_true")
+arg_parser.add_option('-w', '--week', action="store_true")
+arg_parser.add_option('-m', '--month', action="store_true")
 (options, args) = arg_parser.parse_args()
 
 userStoreHttpClient = THttpClient.THttpClient("https://www.evernote.com/edam/user")

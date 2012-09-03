@@ -23,6 +23,6 @@ setup(name='forget',
       packages=find_packages('lib'),
       package_dir = {'':'lib'},
       scripts=['bin/forgetit'],
-      tests_require=["pytest", "pytest-cov"],
+      tests_require=["pytest", "pytest-cov", "mock"],
       cmdclass = {'test': PyTest},      
 )

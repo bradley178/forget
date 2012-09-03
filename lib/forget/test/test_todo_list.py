@@ -80,7 +80,7 @@ class TestTODOList(object):
 		
 		self.mock_notestore_client.getTag.assert_called_once_with(self.mock_authtoken, '1dayguid')
 
-	def test_decode_tag_guid_1_week(self):
+	def test_decode_tag_guid_3_day(self):
 		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
 		self.mock_notestore_client.getTag.return_value = Tag(name="3-day-todo")
 		
@@ -171,14 +171,14 @@ class TestTODOList(object):
 
 		list = todo.List(self.mock_notestore_client, self.mock_authtoken)
 		self._patch_decode_tag_guid()
-		list.notes = notes
+		list.notes = notes		
 		list.delete_expired()
 
 		assert self.mock_notestore_client.deleteNote.call_args_list ==\
 			[call(self.mock_authtoken, "qwerty"), call(self.mock_authtoken, "asdfg")]
 		assert list.notes == []
 
-	def test_delete_2_expired(self):
+	def test_delete_2__only_1_expired(self):
 		notes = [Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(days=2), guid = "qwerty"),
 				 Mock(tagGuids = ['1weekguid'], created = self._build_created_timestamp(days=2), guid = "asdfg")]
 

@@ -50,11 +50,15 @@ class List(object):
 
 	def delete_expired(self):
 		deleted_count = 0
+		deleted = []
 		for note in self.notes:
 			if self.task_expiration_date(note) <= datetime.now():
-				self.client.deleteNote(self.authtoken, note.guid)
-				self.notes.remove(note)
+				self.client.deleteNote(self.authtoken, note.guid)				
 				deleted_count += 1
+				deleted.append(note)
+
+		for note in deleted:
+			self.notes.remove(note)
 		
 		return deleted_count
 

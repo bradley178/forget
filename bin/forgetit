@@ -30,24 +30,24 @@ noteStore = NoteStore.Client(noteStoreProtocol)
 list = todo.List(noteStore, authtoken)
 
 if len(args) > 0:
-	if options.three_day:
-		print "Adding \"{0}\" as a 3 day task.".format(args[0])
-		list.add_3_day_task(args[0])
-	elif options.week:
-		print "Adding \"{0}\" as a 1 week task.".format(args[0])
-		list.add_1_week_task(args[0])
-	elif options.month:
-		print "Adding \"{0}\" as a 1 month task.".format(args[0])
-		list.add_1_month_task(args[0])
-	else:
-		print "Adding \"{0}\" as a 1 day task.".format(args[0])
-		list.add_1_day_task(args[0])
+    if options.three_day:
+        print "Adding \"{0}\" as a 3 day task.".format(args[0])
+        list.add_3_day_task(args[0])
+    elif options.week:
+        print "Adding \"{0}\" as a 1 week task.".format(args[0])
+        list.add_1_week_task(args[0])
+    elif options.month:
+        print "Adding \"{0}\" as a 1 month task.".format(args[0])
+        list.add_1_month_task(args[0])
+    else:
+        print "Adding \"{0}\" as a 1 day task.".format(args[0])
+        list.add_1_day_task(args[0])
 
-	print ""
+    print ""
 
 delete_count = list.delete_expired()
 if delete_count:
-	print "!! Deleted {0} expired tasks !!".format(args[0])
+    print "!! Deleted {0} expired tasks !!".format(args[0])
 for note in list.tasks_by_expiration():
     print "  * {0} (Expires: {1})".format(note.title, list.task_expiration_date(note))
 

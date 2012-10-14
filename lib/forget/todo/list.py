@@ -6,13 +6,18 @@ class List(object):
     def __init__(self, client, authtoken):        
         self.client = client
         self.authtoken = authtoken
-
-        filter = NoteStoreTypes.NoteFilter()
-        filter.words = "notebook:TODO"
     
         self.notes = []
         self.tag_cache = {}
         self.notebook_guid = None
+
+        for notebook in client.listNotebooks(authtoken):
+          if notebook.name == "TODO":
+            self.notebook_guid = notebook.guid
+            break
+
+        filter = NoteStoreTypes.NoteFilter()
+        filter.notebookGuid = self.notebook_guid
 
         offset = 0
         while True:

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from forget import todo
+from forget.todo.list import List
 from optparse import OptionParser
 import evernote.edam.notestore.NoteStore as NoteStore
 import evernote.edam.userstore.UserStore as UserStore
@@ -27,7 +27,7 @@ noteStoreHttpClient = THttpClient.THttpClient(noteStoreUrl)
 noteStoreProtocol = TBinaryProtocol.TBinaryProtocol(noteStoreHttpClient)
 noteStore = NoteStore.Client(noteStoreProtocol)
 
-list = todo.List(noteStore, authtoken)
+list = List(noteStore, authtoken)
 
 if len(args) > 0:
     if options.three_day:

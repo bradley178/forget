@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Tag
+from evernote.edam.type.ttypes import Notebook
 from forget import todo 
 from mock import Mock, patch, call
 import time
@@ -19,6 +20,9 @@ class TestTODOList(object):
 
         self.mock_notefilter = self.notefilter_patcher.start()
         self.mock_note = self.note_patcher.start()
+
+        self.todo_notebook = Notebook(name="TODO", guid=uuid.uuid4())
+        self.mock_notestore_client.listNotebooks.return_value = [self.todo_notebook]
 
 
     def teardown_method(self, method):
@@ -44,18 +48,19 @@ class TestTODOList(object):
 
         list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
         self.mock_notefilter.assert_called_with()        
-        assert self.mock_notefilter.return_value.words == "notebook:TODO"
+        assert self.mock_notefilter.return_value.notebookGuid == self.todo_notebook.guid
         self.mock_notestore_client.findNotes.assert_called_with(self.mock_authtoken,
                                                                 self.mock_notefilter.return_value,
                                                                 0, 50)
 
         assert list.notes == self.mock_notestore_client.findNotes.return_value.notes
 
-    def test_constructor_saves_notebook_guid(self):
-        self.mock_notestore_client.findNotes.return_value = Mock(notes = self._build_notes_list(1), totalNotes = 10)
+    def test_constructor_saves_notebook_guid(self):        
+        other_notebook = Notebook(name="Other", guid=uuid.uuid4())
+        self.mock_notestore_client.listNotebooks.return_value = [other_notebook, self.todo_notebook]
 
         list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
-        assert list.notebook_guid == self.mock_notestore_client.findNotes.return_value.notes[0].notebookGuid
+        assert list.notebook_guid == self.todo_notebook.guid
 
     def test_constructor_multiple_batches(self):
         note_batches = [Mock(notes = self._build_notes_list(50), totalNotes = 60), 
@@ -65,7 +70,7 @@ class TestTODOList(object):
         list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
         
         self.mock_notefilter.assert_called_with()        
-        assert self.mock_notefilter.return_value.words == "notebook:TODO"
+        assert self.mock_notefilter.return_value.notebookGuid == self.todo_notebook.guid
         assert self.mock_notestore_client.findNotes.call_args_list ==\
             [call(self.mock_authtoken, self.mock_notefilter.return_value, 0, 50),
              call(self.mock_authtoken, self.mock_notefilter.return_value, 50, 50)]

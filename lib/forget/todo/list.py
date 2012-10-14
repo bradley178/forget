@@ -72,26 +72,21 @@ class List(object):
         return deleted_count
 
     def add_1_day_task(self, description):
-        self.notes.append(self.client.createNote(self.authtoken, 
-                                                 Note(title=description, 
-                                                      tagNames=["1-day-todo"], 
-                                                      notebookGuid=self.notebook_guid)))
+        self._add_task(description, "1-day-todo")
 
     def add_3_day_task(self, description):
-        self.notes.append(self.client.createNote(self.authtoken, 
-                                                 Note(title=description, 
-                                                      tagNames=["3-day-todo"], 
-                                                      notebookGuid=self.notebook_guid)))
+        self._add_task(description, "3-day-todo")
 
     def add_1_week_task(self, description):
-        self.notes.append(self.client.createNote(self.authtoken, 
-                                                 Note(title=description, 
-                                                      tagNames=["1-week-todo"], 
-                                                      notebookGuid=self.notebook_guid)))
+        self._add_task(description, "1-week-todo")
 
     def add_1_month_task(self, description):
+        self._add_task(description, "1-month-todo")
+
+    def _add_task(self, description, tag):
         self.notes.append(self.client.createNote(self.authtoken, 
                                                  Note(title=description, 
-                                                      tagNames=["1-month-todo"], 
+                                                      tagNames=[tag], 
                                                       notebookGuid=self.notebook_guid)))
+
 

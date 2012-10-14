@@ -9,20 +9,24 @@ class List(object):
     
         self.notes = []
         self.tag_cache = {}
-        self.notebook_guid = None
+        
+        self._find_notebook_guid()
+        self._retrieve_todo_notes()
 
-        for notebook in client.listNotebooks(authtoken):
+    def _find_notebook_guid(self):
+        for notebook in self.client.listNotebooks(self.authtoken):
           if notebook.name == "TODO":
             self.notebook_guid = notebook.guid
             break
 
+    def _retrieve_todo_notes(self):
         filter = NoteStoreTypes.NoteFilter()
         filter.notebookGuid = self.notebook_guid
 
         offset = 0
         while True:
             noteList = self.client.findNotes(self.authtoken, filter, offset, 50)
-                
+
             self.notes += noteList.notes
             offset += len(noteList.notes)
 

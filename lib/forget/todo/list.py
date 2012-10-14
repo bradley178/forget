@@ -17,7 +17,7 @@ class List(object):
         for notebook in self.client.listNotebooks(self.authtoken):
           if notebook.name == "TODO":
             self.notebook_guid = notebook.guid
-            break
+            return
 
     def _retrieve_todo_notes(self):
         filter = NoteStoreTypes.NoteFilter()
@@ -36,7 +36,7 @@ class List(object):
             if (offset >= noteList.totalNotes):
                 break
 
-    def _decode_tag_guid(self, guids):
+    def _decode_expiration_tag_guid(self, guids):
         map = {'1-day-todo': timedelta(days=1),
                '3-day-todo': timedelta(days=3),
                '1-week-todo': timedelta(weeks=1),
@@ -52,7 +52,7 @@ class List(object):
                 return self.tag_cache[guid]
 
     def task_expiration_date(self, note):
-        return datetime.fromtimestamp(note.created / 1000) + self._decode_tag_guid(note.tagGuids)
+        return datetime.fromtimestamp(note.created / 1000) + self._decode_expiration_tag_guid(note.tagGuids)
 
     def tasks_by_expiration(self):        
         return sorted(self.notes, cmp=lambda x, y: cmp(self.task_expiration_date(x), self.task_expiration_date(y)))
@@ -84,9 +84,7 @@ class List(object):
         self._add_task(description, "1-month-todo")
 
     def _add_task(self, description, tag):
-        self.notes.append(self.client.createNote(self.authtoken, 
-                                                 Note(title=description, 
-                                                      tagNames=[tag], 
-                                                      notebookGuid=self.notebook_guid)))
+        self.notes.append(self.client.createNote(self.authtoken, Note(title=description, tagNames=[tag], 
+                                                                      notebookGuid=self.notebook_guid)))
 
 

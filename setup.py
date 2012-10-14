@@ -13,7 +13,6 @@ class PyTest(TestCommand):
         self.test_args = ["--cov-report", "term-missing", "--cov", "lib/forget", "lib/forget"]
         self.test_suite = True
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
         import pytest
         raise SystemExit(pytest.main(self.test_args))
                 

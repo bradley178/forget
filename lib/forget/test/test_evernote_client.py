@@ -1,12 +1,12 @@
-from forget.evernote_auth import EvernoteAuth
+from forget.evernote_client import EvernoteClient
 from mock import patch
 
 class TestEvernoteAuth(object):
     def setup_method(self, method):
-        self.note_store_patcher = patch("forget.evernote_auth.NoteStore")
-        self.user_store_patcher = patch("forget.evernote_auth.UserStore")
-        self.binary_protocol_patcher = patch("forget.evernote_auth.TBinaryProtocol")
-        self.http_client_patcher = patch("forget.evernote_auth.THttpClient")
+        self.note_store_patcher = patch("forget.evernote_client.NoteStore")
+        self.user_store_patcher = patch("forget.evernote_client.UserStore")
+        self.binary_protocol_patcher = patch("forget.evernote_client.TBinaryProtocol")
+        self.http_client_patcher = patch("forget.evernote_client.THttpClient")
 
         self.mock_note_store = self.note_store_patcher.start()
         self.mock_user_store = self.user_store_patcher.start()
@@ -20,5 +20,5 @@ class TestEvernoteAuth(object):
         self.http_client_patcher.stop()
 
     def test_constructor(self):
-        EvernoteAuth()        
+        EvernoteClient("test token")        
 

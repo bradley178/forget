@@ -1,12 +1,12 @@
 import evernote.edam.notestore.NoteStore as NoteStore
 import evernote.edam.userstore.UserStore as UserStore
-import os
 import thrift.protocol.TBinaryProtocol as TBinaryProtocol
 import thrift.transport.THttpClient as THttpClient
 
-class EvernoteAuth(object):
-    def __init__(self):
-        self.authtoken = file(os.path.expanduser("~/evernote.token")).read()
+class EvernoteClient(object):
+
+    def __init__(self, authtoken):
+        self.authtoken = authtoken
 
         user_store_http_client = THttpClient.THttpClient("https://www.evernote.com/edam/user")
         user_store_protocol = TBinaryProtocol.TBinaryProtocol(user_store_http_client)

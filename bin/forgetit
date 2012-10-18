@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 from forget.todo.list import List
-from forget.evernote_auth import EvernoteAuth
+from forget.evernote_client import EvernoteClient
 from optparse import OptionParser
+import os
 
 arg_parser = OptionParser()
 arg_parser.add_option('-d', '--day', action="store_true")
@@ -10,7 +11,7 @@ arg_parser.add_option('-w', '--week', action="store_true")
 arg_parser.add_option('-m', '--month', action="store_true")
 (options, args) = arg_parser.parse_args()
 
-auth = EvernoteAuth()
+auth = EvernoteClient(file(os.path.expanduser("~/evernote.token")).read())
 list = List(auth.note_store, auth.authtoken)
 
 if len(args) > 0:

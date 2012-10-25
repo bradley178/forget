@@ -51,17 +51,19 @@ class List(object):
                 self.tag_cache[guid] = map[tag.name]
                 return self.tag_cache[guid]
 
-    def task_expiration_date(self, note):
+    def _task_expiration_date(self, note):
         return datetime.fromtimestamp(note.created / 1000) + self._decode_expiration_tag_guid(note.tagGuids)
 
-    def tasks_by_expiration(self):        
-        return sorted(self.notes, cmp=lambda x, y: cmp(self.task_expiration_date(x), self.task_expiration_date(y)))
+    def tasks_by_expiration(self):
+        for note in self.notes:
+            note.expires = self._task_expiration_date(note)
+        return sorted(self.notes, cmp=lambda x, y: cmp(x.expires, y.expires))
 
     def delete_expired(self):
         deleted_count = 0
         deleted = []
         for note in self.notes:
-            if self.task_expiration_date(note) <= datetime.now():
+            if self._task_expiration_date(note) <= datetime.now():
                 self.client.deleteNote(self.authtoken, note.guid)                
                 deleted_count += 1
                 deleted.append(note)

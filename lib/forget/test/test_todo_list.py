@@ -138,6 +138,15 @@ class TestTODOList(object):
         list.notes = notes
         assert list.tasks_by_expiration() == notes
 
+    def test_sorted_by_expiration_include_expiration_attr(self):        
+        notes = [Mock(tagGuids = ['1dayguid'], created = int(time.time() * 1000))]
+
+        list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
+        self._patch_decode_expiration_tag_guid()
+        list.notes = notes
+        assert list.tasks_by_expiration()[0].expires == \
+            datetime.fromtimestamp(notes[0].created / 1000) + timedelta(days=1)
+
     def test_sorting_1_day(self):
         notes = [Mock(tagGuids = ['1dayguid'], created = int(time.time() * 1000)),
                  Mock(tagGuids = ['1dayguid'], created = self._build_created_timestamp(hours=12))]

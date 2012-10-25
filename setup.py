@@ -7,10 +7,13 @@ except ImportError:
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
+
 class PyTest(TestCommand):
     def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ["--cov-report", "term-missing", "--cov", "lib/forget", "lib/forget"]
+        TestCommand.finalize_options(self)        
+        self.test_args = ["--cov-report", "term-missing", 
+                          "--cov", "lib/forget", "lib/forget", 
+                          "--cov", "flask_app", "flask_app"]
         self.test_suite = True
     def run_tests(self):
         import pytest

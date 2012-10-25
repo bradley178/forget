@@ -34,7 +34,7 @@ delete_count = list.delete_expired()
 if delete_count:
     print "!! Deleted {0} expired tasks !!".format(args[0])
 for note in list.tasks_by_expiration():
-    print "  * {0} (Expires: {1})".format(note.title, list.task_expiration_date(note))
+    print "  * {0} (Expires: {1})".format(note.title, note.expires)
 
 
 

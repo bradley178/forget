@@ -4,3 +4,5 @@ evernote.token
 build
 forget.egg-info
 dist
+.env
+forget.sublime-*

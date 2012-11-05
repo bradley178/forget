@@ -5,10 +5,11 @@ import thrift.transport.THttpClient as THttpClient
 
 class EvernoteClient(object):
 
-    def __init__(self, authtoken):
+    def __init__(self, url, authtoken):
         self.authtoken = authtoken
+        self.url = url
 
-        user_store_http_client = THttpClient.THttpClient("https://www.evernote.com/edam/user")
+        user_store_http_client = THttpClient.THttpClient(self.url + "/edam/user")
         user_store_protocol = TBinaryProtocol.TBinaryProtocol(user_store_http_client)
         self.user_store = UserStore.Client(user_store_protocol)
 

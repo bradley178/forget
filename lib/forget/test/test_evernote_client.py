@@ -20,5 +20,5 @@ class TestEvernoteAuth(object):
         self.http_client_patcher.stop()
 
     def test_constructor(self):
-        assert EvernoteClient("test token")        
+        assert EvernoteClient("test url", "test token")        
 

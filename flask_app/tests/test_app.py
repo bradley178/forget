@@ -1,41 +1,39 @@
-from mock import patch
+from evernote.edam.error.ttypes import EDAMErrorCode, EDAMUserException
+from flask.ext.testing import TestCase
 from flask_app import app
+from mock import patch
 import oauth2 as oauth
 import pytest
-from evernote.edam.error.ttypes import EDAMErrorCode, EDAMUserException
 
-class TestFlaskApp(object):
-    def setup_method(self, method):        
+class TestFlaskApp(TestCase):
+    def setup_method(self, method):
+        app.app.secret_key = "TEST_APP_SECRET_KEY"
+
         self.evernote_client_patcher = patch("flask_app.app.EvernoteClient")
-        self.list_patcher = patch("flask_app.app.List")
-        self.render_template_patcher = patch("flask_app.app.render_template")
-        self.session_patcher = patch("flask_app.app.session")
+        self.list_patcher = patch("flask_app.app.List")                
 
         self.mock_client = self.evernote_client_patcher.start()
-        self.mock_list = self.list_patcher.start()
-        self.mock_render_template = self.render_template_patcher.start()
-        self.mock_session = self.session_patcher.start()
-
-        self.context = app.app.test_request_context('/')
-        self.context.push()
-
+        self.mock_list = self.list_patcher.start() 
+        
     def teardown_method(self, method):
         self.evernote_client_patcher.stop()
         self.list_patcher.stop()
-        self.render_template_patcher.stop()
-        self.session_patcher.stop()
-
-        self.context.pop()
+        
+    def create_app(self):        
+        app.app.config['TESTING'] = True
+        return app.app
 
     def test_index(self):
-        app.index()
-
-        self.mock_render_template.assert_called_with("index.html", tasks=self.mock_list().tasks_by_expiration())
+        self.assert200(self.client.get("/"))
+        self.mock_list().tasks_by_expiration.assert_called_with()        
 
     def test_index_uses_token_from_session(self):
-        app.index()
+        with patch("flask_app.app.session") as session:        
+            self.assert200(self.client.get("/"))        
+            self.mock_client.assert_called_with(app.EVERNOTE_URL, session.get('evernote_token'))
 
-        self.mock_client.assert_called_with(app.EVERNOTE_URL, self.mock_session.get('evernote_token'))
+    def test_add_task(self):
+        self.assert200(self.client.post("/add"))
 
 class TestAuth(object):
     def setup_method(self, method):

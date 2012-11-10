@@ -2,6 +2,7 @@ from evernote.edam.error.ttypes import EDAMErrorCode, EDAMUserException
 from flask import Flask, redirect, render_template, request, session, url_for
 from forget.evernote_client import EvernoteClient
 from forget.todo.list import List
+from functools import wraps
 import oauth2 as oauth
 import os
 import urllib
@@ -25,6 +26,7 @@ def get_oauth_client(token=None):
 
 
 def require_evernote_auth(fn):
+    @wraps(fn)
     def handle_auth_error():
         try:
             return fn()
@@ -71,11 +73,16 @@ def finish_auth():
 
 @app.route("/")
 @require_evernote_auth
-def index():
+def index():    
     client = EvernoteClient(EVERNOTE_URL, session.get('evernote_token'))
     list = List(client.note_store, client.authtoken)
 
     return render_template('index.html', tasks=list.tasks_by_expiration())
+
+@app.route("/add", methods=['POST'])
+@require_evernote_auth
+def add_task():
+    return ""
 
 if __name__ == "__main__":
     app.secret_key = APP_SECRET_KEY

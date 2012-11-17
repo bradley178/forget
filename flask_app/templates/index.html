@@ -1,6 +1,15 @@
 <head>
 </head>
 <body>
+    <form class="add_task_form" action={{url_for('add_task')}} method="post">
+        Task Description: <input type="text" name="description"><br/>        
+        <input type="radio" name="expiration" value="1">1 Day<br/>
+        <input type="radio" name="expiration" value="3">3 Day<br/>
+        <input type="radio" name="expiration" value="w">1 Week<br/>
+        <input type="radio" name="expiration" value="m">1 Month<br/>
+        <input type="submit" value="Add">    
+    </form>
+
     <ul class='task_list'>
         {% for task in tasks %}
         <ol>            

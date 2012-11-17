@@ -74,15 +74,28 @@ def finish_auth():
 @app.route("/")
 @require_evernote_auth
 def index():    
-    client = EvernoteClient(EVERNOTE_URL, session.get('evernote_token'))
-    list = List(client.note_store, client.authtoken)
-
-    return render_template('index.html', tasks=list.tasks_by_expiration())
+    return render_template('index.html', tasks=_get_list().tasks_by_expiration())
 
 @app.route("/add", methods=['POST'])
 @require_evernote_auth
 def add_task():
-    return ""
+    expiration = request.form.get("expiration")
+    list = _get_list()
+
+    if expiration == "3":
+        list.add_3_day_task(request.form.get('description'))
+    elif expiration == "w":
+        list.add_1_week_task(request.form.get('description'))
+    elif expiration == "m":
+        list.add_1_month_task(request.form.get('description'))
+    else:
+        list.add_1_day_task(request.form.get('description'))
+    return render_template('index.html', tasks=list.tasks_by_expiration())
+
+def _get_list():
+    client = EvernoteClient(EVERNOTE_URL, session.get('evernote_token'))
+    return List(client.note_store, client.authtoken)
+
 
 if __name__ == "__main__":
     app.secret_key = APP_SECRET_KEY

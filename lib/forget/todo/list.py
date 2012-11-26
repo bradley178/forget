@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Note
 import evernote.edam.notestore.ttypes as NoteStoreTypes
 
+import logging
+
 class List(object):
     def __init__(self, client, authtoken):        
         self.client = client
@@ -86,7 +88,11 @@ class List(object):
         self._add_task(description, "1-month-todo")
 
     def _add_task(self, description, tag):
-        self.notes.append(self.client.createNote(self.authtoken, Note(title=description, tagNames=[tag], 
-                                                                      notebookGuid=self.notebook_guid)))
+        note = Note(title=description, tagNames=[tag], notebookGuid=self.notebook_guid)
+        note.content = '<?xml version="1.0" encoding="UTF-8"?>'
+        note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+        note.content += '<en-note></en-note>'
+        
+        self.notes.append(self.client.createNote(self.authtoken, note))
 
 

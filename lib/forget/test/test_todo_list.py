@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-from evernote.edam.type.ttypes import Tag
 from evernote.edam.type.ttypes import Notebook
+from evernote.edam.type.ttypes import Tag
 from forget import todo 
+from hamcrest import has_property, match_equality
 from mock import Mock, patch, call
 import time
 import uuid
@@ -67,7 +68,7 @@ class TestTODOList(object):
                         Mock(notes = self._build_notes_list(10), totalNotes = 60)]
         self.mock_notestore_client.findNotes.side_effect = lambda *args: note_batches.pop(0)
 
-        list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
+        todo.list.List(self.mock_notestore_client, self.mock_authtoken)
         
         self.mock_notefilter.assert_called_with()                
         assert self.mock_notestore_client.findNotes.call_args_list ==\
@@ -269,6 +270,17 @@ class TestTODOList(object):
                                           notebookGuid=list.notebook_guid)
         self.mock_notestore_client.createNote.assert_called_with(self.mock_authtoken, self.mock_note.return_value)
         assert list.notes == [self.mock_notestore_client.createNote.return_value]
+
+    def test_add_task_empty_note_content(self):
+        list = todo.list.List(self.mock_notestore_client, self.mock_authtoken)
+        expected_content = '<?xml version="1.0" encoding="UTF-8"?>'
+        expected_content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+        expected_content += '<en-note></en-note>'
+
+        list._add_task(None, None)
+        self.mock_notestore_client.createNote.\
+            assert_called_with(self.mock_authtoken, match_equality(has_property("content", expected_content)))
+
 
         
 

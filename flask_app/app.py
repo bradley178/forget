@@ -73,8 +73,10 @@ def finish_auth():
 
 @app.route("/")
 @require_evernote_auth
-def index():    
-    return render_template('index.html', tasks=_get_list().tasks_by_expiration())
+def index():
+    list = _get_list()
+    list.delete_expired()    
+    return render_template('index.html', tasks=list.tasks_by_expiration())
 
 @app.route("/add", methods=['POST'])
 @require_evernote_auth

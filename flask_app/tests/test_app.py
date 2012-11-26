@@ -27,6 +27,10 @@ class TestFlaskApp(TestCase):
         self.assert200(self.client.get("/"))
         self.mock_list().tasks_by_expiration.assert_called_with()        
 
+    def test_index_deletes_expired_tasks(self):
+        self.assert200(self.client.get("/"))
+        self.mock_list().delete_expired.assert_called_with()        
+
     def test_index_uses_token_from_session(self):
         with patch("flask_app.app.session") as session:        
             self.assert200(self.client.get("/"))        

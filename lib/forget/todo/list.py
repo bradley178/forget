@@ -2,8 +2,6 @@ from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Note
 import evernote.edam.notestore.ttypes as NoteStoreTypes
 
-import logging
-
 class List(object):
     def __init__(self, client, authtoken):        
         self.client = client

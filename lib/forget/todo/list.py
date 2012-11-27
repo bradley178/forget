@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from evernote.edam.type.ttypes import Note
 import evernote.edam.notestore.ttypes as NoteStoreTypes
+from forget import date
 
 class List(object):
     def __init__(self, client, authtoken):        
@@ -57,6 +58,7 @@ class List(object):
     def tasks_by_expiration(self):
         for note in self.notes:
             note.expires = self._task_expiration_date(note)
+            note.expires_display = date.friendly_display(note.expires)
         return sorted(self.notes, cmp=lambda x, y: cmp(x.expires, y.expires))
 
     def delete_expired(self):

@@ -14,7 +14,7 @@
         {% for task in tasks %}
         <ol>            
             <div class='task_description'>{{task.title}}</div>
-            <div class='task_expiration'>(Expires: {{task.expires}})</div>
+            <div class='task_expiration'>Expires {{task.expires_display}} ({{task.expires}})</div>
         </ol>
         {% endfor %}
     </ul>

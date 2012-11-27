@@ -92,7 +92,7 @@ def add_task():
         list.add_1_month_task(request.form.get('description'))
     else:
         list.add_1_day_task(request.form.get('description'))
-    return render_template('index.html', tasks=list.tasks_by_expiration())
+    return redirect(url_for('index'))
 
 def _get_list():
     client = EvernoteClient(EVERNOTE_URL, session.get('evernote_token'))

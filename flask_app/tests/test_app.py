@@ -37,24 +37,28 @@ class TestFlaskApp(TestCase):
             self.mock_client.assert_called_with(app.EVERNOTE_URL, session.get('evernote_token'))
 
     def test_add_task_no_expiration(self):
-        self.assertRedirects(self.client.post("/add", data={"description": "test task"}), "/")
+        self.assertRedirects(self.client.post("/task", data={"description": "test task"}), "/")
         self.mock_list().add_1_day_task.assert_called_with("test task")
 
     def test_add_1_day_task(self):
-        self.assertRedirects(self.client.post("/add", data={"description": "test task", "expiration": 1}), "/")
+        self.assertRedirects(self.client.post("/task", data={"description": "test task", "expiration": 1}), "/")
         self.mock_list().add_1_day_task.assert_called_with("test task")
 
     def test_add_3_day_task(self):
-        self.assertRedirects(self.client.post("/add", data={"description": "test task", "expiration": 3}), "/")
+        self.assertRedirects(self.client.post("/task", data={"description": "test task", "expiration": 3}), "/")
         self.mock_list().add_3_day_task.assert_called_with("test task")
 
     def test_add_1_week_task(self):
-        self.assertRedirects(self.client.post("/add", data={"description": "test task", "expiration": "w"}), "/")
+        self.assertRedirects(self.client.post("/task", data={"description": "test task", "expiration": "w"}), "/")
         self.mock_list().add_1_week_task.assert_called_with("test task")
 
     def test_add_1_month_task(self):
-        self.assertRedirects(self.client.post("/add", data={"description": "test task", "expiration": "m"}), "/")
+        self.assertRedirects(self.client.post("/task", data={"description": "test task", "expiration": "m"}), "/")
         self.mock_list().add_1_month_task.assert_called_with("test task")
+
+    def test_delete_task(self):
+        self.assertRedirects(self.client.post("/task/abcdef/delete"), "/")
+        self.mock_list().delete_task.assert_called_with("abcdef")
 
 class TestAuth(object):
     def setup_method(self, method):

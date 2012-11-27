@@ -27,9 +27,9 @@ def get_oauth_client(token=None):
 
 def require_evernote_auth(fn):
     @wraps(fn)
-    def handle_auth_error():
+    def handle_auth_error(*args, **kwargs):
         try:
-            return fn()
+            return fn(*args, **kwargs)
         except EDAMUserException, e:
             if e.errorCode == EDAMErrorCode.DATA_REQUIRED: 
                 return redirect(url_for('start_auth'))
@@ -78,7 +78,7 @@ def index():
     list.delete_expired()    
     return render_template('index.html', tasks=list.tasks_by_expiration())
 
-@app.route("/add", methods=['POST'])
+@app.route("/task", methods=['POST'])
 @require_evernote_auth
 def add_task():
     expiration = request.form.get("expiration")
@@ -92,6 +92,12 @@ def add_task():
         list.add_1_month_task(request.form.get('description'))
     else:
         list.add_1_day_task(request.form.get('description'))
+    return redirect(url_for('index'))
+
+@app.route("/task/<guid>/delete", methods=['POST'])
+@require_evernote_auth
+def delete_task(guid):
+    _get_list().delete_task(guid)    
     return redirect(url_for('index'))
 
 def _get_list():

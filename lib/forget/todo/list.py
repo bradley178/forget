@@ -95,4 +95,7 @@ class List(object):
         
         self.notes.append(self.client.createNote(self.authtoken, note))
 
+    def delete_task(self, guid):
+        self.client.deleteNote(self.authtoken, guid)
+
 

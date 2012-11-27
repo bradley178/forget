@@ -15,6 +15,9 @@
         <ol>            
             <div class='task_description'>{{task.title}}</div>
             <div class='task_expiration'>Expires {{task.expires_display}} ({{task.expires}})</div>
+            <form class="delete_task_form" action={{url_for('delete_task', guid=task.guid)}} method="post">
+                <input type="submit" value="Delete">    
+            </form>
         </ol>
         {% endfor %}
     </ul>

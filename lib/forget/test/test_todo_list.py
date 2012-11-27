@@ -44,6 +44,9 @@ class TestTODOList(object):
     def _build_notes_list(self, count):
         return [Mock(created = int(time.time() * 1000)) for x in range(count)]
 
+    def _build_list(self):
+        return todo.list.List(self.mock_notestore_client, self.mock_authtoken)
+
     def test_constructor(self):
         self.mock_notestore_client.findNotes.return_value = Mock(notes = self._build_notes_list(50), totalNotes = 10)
 
@@ -280,6 +283,11 @@ class TestTODOList(object):
         list._add_task(None, None)
         self.mock_notestore_client.createNote.\
             assert_called_with(self.mock_authtoken, match_equality(has_property("content", expected_content)))
+
+    def test_delete_task(self):
+        self._build_list().delete_task("abcdef")
+
+        self.mock_notestore_client.deleteNote.assert_called_with(self.mock_authtoken, "abcdef")
 
 
         
